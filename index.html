@@ -319,6 +319,8 @@ function updateScoreDetail() {
 
 function endGame() {
   gameOver = true;
+  if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  aiThinking = false;
   const { blueScore, redScore } = computeScores();
   const statusEl = document.getElementById('status');
   let result;
@@ -355,6 +357,7 @@ function aiChooseMove() {
       }
     }
   }
+  if (bestMoves.length === 0) return null;
   return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 }
 
