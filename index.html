@@ -376,6 +376,7 @@ function aiTurn() {
 function initGame() {
   if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
   aiThinking = false;
+  hidePicker();
   gameOver = false;
   currentPlayer = 'blue';
   lastPlayer = null;
@@ -397,6 +398,7 @@ document.getElementById('opponent').addEventListener('change', function() {
   aiEnabled = this.value === 'ai';
   initGame();
 });
+aiEnabled = document.getElementById('opponent').value === 'ai';
 initGame();
 </script>
 </body>
