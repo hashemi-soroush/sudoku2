@@ -125,6 +125,7 @@ let lastPlayer = null;
 let gameOver = false;
 let aiEnabled = false;
 let aiThinking = false;
+let aiTimeoutId = null;
 
 // --- Helpers ---
 function idx(r, c) { return r * 9 + c; }
@@ -360,7 +361,9 @@ function aiChooseMove() {
 function aiTurn() {
   if (gameOver || !aiEnabled || currentPlayer !== 'red') return;
   aiThinking = true;
-  setTimeout(() => {
+  aiTimeoutId = setTimeout(() => {
+    aiTimeoutId = null;
+    if (gameOver || currentPlayer !== 'red') { aiThinking = false; return; }
     const move = aiChooseMove();
     if (move) {
       placeDigit(rowOf(move.cell), colOf(move.cell), move.digit);
@@ -371,6 +374,8 @@ function aiTurn() {
 
 // --- Init ---
 function initGame() {
+  if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  aiThinking = false;
   gameOver = false;
   currentPlayer = 'blue';
   lastPlayer = null;
