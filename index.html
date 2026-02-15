@@ -47,6 +47,9 @@ h1 { margin-bottom: 10px; }
 }
 #picker button:hover { background: #ddd; }
 #new-game { margin-top: 15px; padding: 10px 24px; font-size: 1em; cursor: pointer; border-radius: 4px; border: 1px solid #999; }
+#mode-select { margin: 10px 0; font-size: 1em; }
+#mode-select label { font-weight: bold; margin-right: 6px; }
+#mode-select select { padding: 4px 8px; font-size: 1em; border-radius: 4px; border: 1px solid #999; }
 #score-detail { margin-top: 10px; font-size: 0.9em; color: #555; min-height: 1.2em; }
 #rules { width: 240px; font-size: 0.85em; color: #444; line-height: 1.5; }
 #rules h2 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
@@ -75,6 +78,13 @@ h1 { margin-bottom: 10px; }
 </head>
 <body>
 <h1>Sudoku2</h1>
+<div id="mode-select">
+  <label for="opponent">Red player:</label>
+  <select id="opponent">
+    <option value="human">Human</option>
+    <option value="ai">AI</option>
+  </select>
+</div>
 <div id="status"></div>
 <div id="main">
   <div>
@@ -113,6 +123,8 @@ const board = []; // board[row*9+col] = { value, color }
 let currentPlayer = 'blue';
 let lastPlayer = null;
 let gameOver = false;
+let aiEnabled = false;
+let aiThinking = false;
 
 // --- Helpers ---
 function idx(r, c) { return r * 9 + c; }
@@ -233,7 +245,7 @@ function capitalize(s) { return s[0].toUpperCase() + s.slice(1); }
 
 // --- Picker ---
 function onCellClick(r, c, event) {
-  if (gameOver) return;
+  if (gameOver || aiThinking) return;
   const cellIdx = idx(r, c);
   if (board[cellIdx].value) return;
   const digits = legalDigits(cellIdx);
@@ -285,6 +297,7 @@ function placeDigit(r, c, digit) {
   } else {
     updateStatus();
     updateScoreDetail();
+    aiTurn();
   }
 }
 
@@ -315,6 +328,47 @@ function endGame() {
   updateScoreDetail();
 }
 
+// --- AI player (greedy) ---
+function aiChooseMove() {
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  const aiColor = currentPlayer;
+  const oppColor = aiColor === 'blue' ? 'red' : 'blue';
+
+  for (let i = 0; i < 81; i++) {
+    if (board[i].value) continue;
+    const digits = legalDigits(i);
+    for (const d of digits) {
+      // Simulate
+      board[i] = { value: d, color: aiColor };
+      const scores = computeScores();
+      const delta = scores[aiColor + 'Score'] - scores[oppColor + 'Score'];
+      // Undo
+      board[i] = { value: null, color: null };
+
+      if (delta > bestScore) {
+        bestScore = delta;
+        bestMoves = [{ cell: i, digit: d }];
+      } else if (delta === bestScore) {
+        bestMoves.push({ cell: i, digit: d });
+      }
+    }
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+function aiTurn() {
+  if (gameOver || !aiEnabled || currentPlayer !== 'red') return;
+  aiThinking = true;
+  setTimeout(() => {
+    const move = aiChooseMove();
+    if (move) {
+      placeDigit(rowOf(move.cell), colOf(move.cell), move.digit);
+    }
+    aiThinking = false;
+  }, 400);
+}
+
 // --- Init ---
 function initGame() {
   gameOver = false;
@@ -334,6 +388,10 @@ function initGame() {
 }
 
 document.getElementById('new-game').addEventListener('click', initGame);
+document.getElementById('opponent').addEventListener('change', function() {
+  aiEnabled = this.value === 'ai';
+  initGame();
+});
 initGame();
 </script>
 </body>
