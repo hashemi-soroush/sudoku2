@@ -366,7 +366,7 @@ function aiTurn() {
   aiThinking = true;
   aiTimeoutId = setTimeout(() => {
     aiTimeoutId = null;
-    if (gameOver || currentPlayer !== 'red') { aiThinking = false; return; }
+    if (gameOver || !aiEnabled || currentPlayer !== 'red') { aiThinking = false; return; }
     const move = aiChooseMove();
     if (move) {
       placeDigit(rowOf(move.cell), colOf(move.cell), move.digit);
