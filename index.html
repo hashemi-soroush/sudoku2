@@ -7,6 +7,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f5f5f5; }
+#main { display: flex; align-items: flex-start; gap: 32px; }
 h1 { margin-bottom: 10px; }
 #status { font-size: 1.2em; margin: 10px 0; min-height: 1.5em; font-weight: bold; }
 #board { border-collapse: collapse; }
@@ -47,16 +48,47 @@ h1 { margin-bottom: 10px; }
 #picker button:hover { background: #ddd; }
 #new-game { margin-top: 15px; padding: 10px 24px; font-size: 1em; cursor: pointer; border-radius: 4px; border: 1px solid #999; }
 #score-detail { margin-top: 10px; font-size: 0.9em; color: #555; min-height: 1.2em; }
+#rules { width: 240px; font-size: 0.85em; color: #444; line-height: 1.5; }
+#rules h2 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
+#rules h3 { margin-top: 10px; margin-bottom: 4px; color: #333; font-size: 0.95em; }
+#rules ul { margin-left: 18px; margin-bottom: 4px; }
+#rules p { margin-bottom: 4px; }
 </style>
 </head>
 <body>
 <h1>Sudoku2</h1>
 <div id="status"></div>
-<table id="board"></table>
-<div id="score-detail"></div>
+<div id="main">
+  <div>
+    <table id="board"></table>
+    <div id="score-detail"></div>
+    <button id="new-game">New Game</button>
+  </div>
+  <div id="rules">
+    <h2>Rules</h2>
+
+    <h3>Setup</h3>
+    <p>A 9×9 grid starts with 9 <span class="gold">Gold</span> digits (1–9) in valid positions. Two players — <span class="blue">Blue</span> and <span class="red">Red</span> — take turns.</p>
+
+    <h3>Gameplay</h3>
+    <ul>
+      <li><span class="blue">Blue</span> goes first. Players alternate.</li>
+      <li>Place a number (1–9) in an empty cell. No passing.</li>
+      <li>The number must not already exist in the same row, column, or 3×3 block.</li>
+    </ul>
+
+    <h3>Game End</h3>
+    <p>The game ends when the board is full or no legal move exists.</p>
+
+    <h3>Scoring</h3>
+    <p>27 regions (9 rows + 9 columns + 9 blocks). The player with more numbers in a region wins 1 point. <span class="gold">Gold</span> counts for neither. Ties award no point.</p>
+
+    <h3>Winner</h3>
+    <p>Most points wins. If tied, the player who placed the last number wins.</p>
+  </div>
+</div>
 <div id="picker-overlay"></div>
 <div id="picker"></div>
-<button id="new-game">New Game</button>
 
 <script>
 const board = []; // board[row*9+col] = { value, color }
