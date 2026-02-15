@@ -370,6 +370,9 @@ function aiTurn() {
     const move = aiChooseMove();
     if (move) {
       placeDigit(rowOf(move.cell), colOf(move.cell), move.digit);
+    } else if (!gameOver) {
+      // No legal moves for AI: end the game
+      endGame();
     }
     aiThinking = false;
   }, 400);
