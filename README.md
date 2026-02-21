@@ -1,4 +1,5 @@
 # Sudoku2
 
-Go [here](https://hashemi-soroush.github.io/sudoku2/) to play the game.
-
+## Live Versions
+- [Nightly Build](https://sudoku2-staging.pages.dev)
+- [Version 1](https://sudoku2-v1.pages.dev)
