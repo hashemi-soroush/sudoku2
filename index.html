@@ -1,411 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sudoku2</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f5f5f5; }
-#main { display: flex; align-items: flex-start; gap: 32px; }
-h1 { margin-bottom: 10px; }
-#status { font-size: 1.2em; margin: 10px 0; min-height: 1.5em; font-weight: bold; }
-#board { border-collapse: collapse; }
-#board td {
-  width: 52px; height: 52px;
-  text-align: center; vertical-align: middle;
-  font-size: 1.5em; font-weight: bold;
-  border: 1px solid #999;
-  cursor: pointer;
-  user-select: none;
-}
-#board td:hover { background: #e8e8e8; }
-#board td.filled:hover { background: transparent; cursor: default; }
-/* Thick borders for 3x3 blocks */
-#board td:nth-child(3n) { border-right: 3px solid #333; }
-#board td:nth-child(3n+1) { border-left: 3px solid #333; }
-#board tr:nth-child(3n) td { border-bottom: 3px solid #333; }
-#board tr:nth-child(3n+1) td { border-top: 3px solid #333; }
-/* Colors */
-.gold { color: #b8860b; }
-.blue { color: #1a5fb4; }
-.red { color: #c01c28; }
-/* Digit picker */
-#picker-overlay {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 10;
-}
-#picker {
-  display: none; position: absolute; z-index: 20;
-  background: white; border: 2px solid #333; border-radius: 8px;
-  padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-#picker button {
-  width: 40px; height: 40px; font-size: 1.2em; font-weight: bold;
-  margin: 2px; border: 1px solid #ccc; border-radius: 4px;
-  cursor: pointer; background: #fff;
-}
-#picker button:hover { background: #ddd; }
-#new-game { margin-top: 15px; padding: 10px 24px; font-size: 1em; cursor: pointer; border-radius: 4px; border: 1px solid #999; }
-#mode-select { margin: 10px 0; font-size: 1em; }
-#mode-select label { font-weight: bold; margin-right: 6px; }
-#mode-select select { padding: 4px 8px; font-size: 1em; border-radius: 4px; border: 1px solid #999; }
-#score-detail { margin-top: 10px; font-size: 0.9em; color: #555; min-height: 1.2em; }
-#rules { width: 240px; font-size: 0.85em; color: #444; line-height: 1.5; }
-#rules h2 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
-#rules h3 { margin-top: 10px; margin-bottom: 4px; color: #333; font-size: 0.95em; }
-#rules ul { margin-left: 18px; margin-bottom: 4px; }
-#rules p { margin-bottom: 4px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku2</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* Mobile responsive */
-@media (max-width: 540px) {
-  body { padding: 12px; }
-  #main { flex-direction: column; align-items: center; gap: 20px; }
-  #board td {
-    width: calc((100vw - 32px) / 9);
-    height: calc((100vw - 32px) / 9);
-    font-size: 1.2em;
-  }
-  #picker {
-    left: 50% !important;
-    transform: translateX(-50%);
-  }
-  #picker button { width: 36px; height: 36px; font-size: 1.1em; }
-  #rules { width: auto; max-width: 100%; }
-  #new-game { width: 100%; }
-}
-</style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    #main {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #status {
+      font-size: 1.2em;
+      margin: 10px 0;
+      min-height: 1.5em;
+      font-weight: bold;
+    }
+
+    #board {
+      border-collapse: collapse;
+    }
+
+    #board td {
+      width: 52px;
+      height: 52px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 1.5em;
+      font-weight: bold;
+      border: 1px solid #999;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #board td:hover {
+      background: #e8e8e8;
+    }
+
+    #board td.filled:hover {
+      background: transparent;
+      cursor: default;
+    }
+
+    /* Thick borders for 3x3 blocks */
+    #board td:nth-child(3n) {
+      border-right: 3px solid #333;
+    }
+
+    #board td:nth-child(3n+1) {
+      border-left: 3px solid #333;
+    }
+
+    #board tr:nth-child(3n) td {
+      border-bottom: 3px solid #333;
+    }
+
+    #board tr:nth-child(3n+1) td {
+      border-top: 3px solid #333;
+    }
+
+    /* Colors */
+    .gold {
+      color: #b8860b;
+    }
+
+    .blue {
+      color: #1a5fb4;
+    }
+
+    .red {
+      color: #c01c28;
+    }
+
+    /* Digit picker */
+    #picker-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+    }
+
+    #picker {
+      display: none;
+      position: absolute;
+      z-index: 20;
+      background: white;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    #picker button {
+      width: 40px;
+      height: 40px;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin: 2px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #fff;
+    }
+
+    #picker button:hover {
+      background: #ddd;
+    }
+
+    #new-game {
+      margin-top: 15px;
+      padding: 10px 24px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid #999;
+    }
+
+    #theme-toggle {
+      padding: 8px 12px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid #999;
+      background: #fff;
+    }
+
+    #mode-select {
+      margin: 10px 0;
+      font-size: 1em;
+    }
+
+    #mode-select label {
+      font-weight: bold;
+      margin-right: 6px;
+    }
+
+    #mode-select select {
+      padding: 4px 8px;
+      font-size: 1em;
+      border-radius: 4px;
+      border: 1px solid #999;
+    }
+
+    #score-detail {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #555;
+      min-height: 1.2em;
+    }
+
+    #rules {
+      width: 240px;
+      font-size: 0.85em;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    #rules h2 {
+      font-size: 1.1em;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    #rules h3 {
+      margin-top: 10px;
+      margin-bottom: 4px;
+      color: #333;
+      font-size: 0.95em;
+    }
+
+    #rules ul {
+      margin-left: 18px;
+      margin-bottom: 4px;
+    }
+
+    #rules p {
+      margin-bottom: 4px;
+    }
+
+    /* Dark Mode */
+    body.dark-mode {
+      background: #121212;
+      color: #f0f0f0;
+    }
+
+    body.dark-mode #board td {
+      border-color: #555;
+    }
+
+    body.dark-mode #board td:hover {
+      background: #2a2a2a;
+    }
+
+    body.dark-mode #board td.filled:hover {
+      background: transparent;
+    }
+
+    body.dark-mode #board td:nth-child(3n) {
+      border-right-color: #888;
+    }
+
+    body.dark-mode #board td:nth-child(3n+1) {
+      border-left-color: #888;
+    }
+
+    body.dark-mode #board tr:nth-child(3n) td {
+      border-bottom-color: #888;
+    }
+
+    body.dark-mode #board tr:nth-child(3n+1) td {
+      border-top-color: #888;
+    }
+
+    body.dark-mode #picker {
+      background: #222;
+      border-color: #888;
+    }
+
+    body.dark-mode #picker button {
+      background: #333;
+      border-color: #555;
+      color: #f0f0f0;
+    }
+
+    body.dark-mode #picker button:hover {
+      background: #444;
+    }
+
+    body.dark-mode #new-game,
+    body.dark-mode #mode-select select,
+    body.dark-mode #theme-toggle {
+      background: #333;
+      color: #f0f0f0;
+      border: 1px solid #666;
+    }
+
+    body.dark-mode #new-game:hover,
+    body.dark-mode #theme-toggle:hover {
+      background: #444;
+    }
+
+    body.dark-mode #score-detail {
+      color: #bbb;
+    }
+
+    body.dark-mode #rules {
+      color: #ccc;
+    }
+
+    body.dark-mode #rules h2,
+    body.dark-mode #rules h3 {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .gold {
+      color: #e5b320;
+    }
+
+    body.dark-mode .blue {
+      color: #4da6ff;
+    }
+
+    body.dark-mode .red {
+      color: #ff6666;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 540px) {
+      body {
+        padding: 12px;
+      }
+
+      #main {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      #board td {
+        width: calc((100vw - 32px) / 9);
+        height: calc((100vw - 32px) / 9);
+        font-size: 1.2em;
+      }
+
+      #picker {
+        left: 50% !important;
+        transform: translateX(-50%);
+      }
+
+      #picker button {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1em;
+      }
+
+      #rules {
+        width: auto;
+        max-width: 100%;
+      }
+
+      #new-game {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<h1>Sudoku2</h1>
-<div id="mode-select">
-  <label for="opponent">Red player:</label>
-  <select id="opponent">
-    <option value="human">Human</option>
-    <option value="ai">AI</option>
-  </select>
-</div>
-<div id="status"></div>
-<div id="main">
-  <div>
-    <table id="board"></table>
-    <div id="score-detail"></div>
-    <button id="new-game">New Game</button>
+  <div style="position: relative; width: 100%; max-width: 600px; margin-bottom: 10px; text-align: center;">
+    <h1 style="margin-bottom: 0;">Sudoku2</h1>
+    <button id="theme-toggle" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);">🌙 Dark
+      Mode</button>
   </div>
-  <div id="rules">
-    <h2>Rules</h2>
-
-    <h3>Setup</h3>
-    <p>A 9×9 grid starts with 9 <span class="gold">Gold</span> digits (1–9) in valid positions. Two players — <span class="blue">Blue</span> and <span class="red">Red</span> — take turns.</p>
-
-    <h3>Gameplay</h3>
-    <ul>
-      <li><span class="blue">Blue</span> goes first. Players alternate.</li>
-      <li>Place a number (1–9) in an empty cell. No passing.</li>
-      <li>The number must not already exist in the same row, column, or 3×3 block.</li>
-    </ul>
-
-    <h3>Game End</h3>
-    <p>The game ends when the board is full or no legal move exists.</p>
-
-    <h3>Scoring</h3>
-    <p>27 regions (9 rows + 9 columns + 9 blocks). The player with more numbers in a region wins 1 point. <span class="gold">Gold</span> counts for neither. Ties award no point.</p>
-
-    <h3>Winner</h3>
-    <p>Most points wins. If tied, the player who placed the last number wins.</p>
+  <div id="mode-select">
+    <label for="opponent">Red player:</label>
+    <select id="opponent">
+      <option value="human">Human</option>
+      <option value="ai">AI</option>
+    </select>
   </div>
-</div>
-<div id="picker-overlay"></div>
-<div id="picker"></div>
+  <div id="status"></div>
+  <div id="main">
+    <div>
+      <table id="board"></table>
+      <div id="score-detail"></div>
+      <button id="new-game">New Game</button>
+    </div>
+    <div id="rules">
+      <h2>Rules</h2>
 
-<script>
-const board = []; // board[row*9+col] = { value, color }
-let currentPlayer = 'blue';
-let lastPlayer = null;
-let gameOver = false;
-let aiEnabled = false;
-let aiThinking = false;
-let aiTimeoutId = null;
+      <h3>Setup</h3>
+      <p>A 9×9 grid starts with 9 <span class="gold">Gold</span> digits (1–9) in valid positions. Two players — <span
+          class="blue">Blue</span> and <span class="red">Red</span> — take turns.</p>
 
-// --- Helpers ---
-function idx(r, c) { return r * 9 + c; }
-function rowOf(i) { return Math.floor(i / 9); }
-function colOf(i) { return i % 9; }
-function blockOf(i) { return Math.floor(rowOf(i) / 3) * 3 + Math.floor(colOf(i) / 3); }
+      <h3>Gameplay</h3>
+      <ul>
+        <li><span class="blue">Blue</span> goes first. Players alternate.</li>
+        <li>Place a number (1–9) in an empty cell. No passing.</li>
+        <li>The number must not already exist in the same row, column, or 3×3 block.</li>
+      </ul>
 
-function regionCells(type, n) {
-  const cells = [];
-  if (type === 'row') { for (let c = 0; c < 9; c++) cells.push(idx(n, c)); }
-  else if (type === 'col') { for (let r = 0; r < 9; r++) cells.push(idx(r, n)); }
-  else { // block
-    const br = Math.floor(n / 3) * 3, bc = (n % 3) * 3;
-    for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) cells.push(idx(br + dr, bc + dc));
-  }
-  return cells;
-}
+      <h3>Game End</h3>
+      <p>The game ends when the board is full or no legal move exists.</p>
 
-function usedInRegion(type, n) {
-  const used = new Set();
-  for (const i of regionCells(type, n)) {
-    if (board[i].value) used.add(board[i].value);
-  }
-  return used;
-}
+      <h3>Scoring</h3>
+      <p>27 regions (9 rows + 9 columns + 9 blocks). The player with more numbers in a region wins 1 point. <span
+          class="gold">Gold</span> counts for neither. Ties award no point.</p>
 
-function legalDigits(cellIdx) {
-  const r = rowOf(cellIdx), c = colOf(cellIdx), b = blockOf(cellIdx);
-  const used = new Set([...usedInRegion('row', r), ...usedInRegion('col', c), ...usedInRegion('block', b)]);
-  const legal = [];
-  for (let d = 1; d <= 9; d++) if (!used.has(d)) legal.push(d);
-  return legal;
-}
+      <h3>Winner</h3>
+      <p>Most points wins. If tied, the player who placed the last number wins.</p>
+    </div>
+  </div>
+  <div id="picker-overlay"></div>
+  <div id="picker"></div>
 
-function anyLegalMoveExists() {
-  for (let i = 0; i < 81; i++) {
-    if (!board[i].value && legalDigits(i).length > 0) return true;
-  }
-  return false;
-}
+  <script>
+    const board = []; // board[row*9+col] = { value, color }
+    let currentPlayer = 'blue';
+    let lastPlayer = null;
+    let gameOver = false;
+    let aiEnabled = false;
+    let aiThinking = false;
+    let aiTimeoutId = null;
 
-// --- Gold placement ---
-function placeGoldDigits() {
-  const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  // Shuffle
-  for (let i = digits.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [digits[i], digits[j]] = [digits[j], digits[i]];
-  }
-  for (const d of digits) {
-    const candidates = [];
-    for (let i = 0; i < 81; i++) {
-      if (!board[i].value && legalDigits(i).includes(d)) candidates.push(i);
+    // --- Helpers ---
+    function idx(r, c) { return r * 9 + c; }
+    function rowOf(i) { return Math.floor(i / 9); }
+    function colOf(i) { return i % 9; }
+    function blockOf(i) { return Math.floor(rowOf(i) / 3) * 3 + Math.floor(colOf(i) / 3); }
+
+    function regionCells(type, n) {
+      const cells = [];
+      if (type === 'row') { for (let c = 0; c < 9; c++) cells.push(idx(n, c)); }
+      else if (type === 'col') { for (let r = 0; r < 9; r++) cells.push(idx(r, n)); }
+      else { // block
+        const br = Math.floor(n / 3) * 3, bc = (n % 3) * 3;
+        for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) cells.push(idx(br + dr, bc + dc));
+      }
+      return cells;
     }
-    if (candidates.length === 0) return false; // shouldn't happen but safety
-    const pick = candidates[Math.floor(Math.random() * candidates.length)];
-    board[pick] = { value: d, color: 'gold' };
-  }
-  return true;
-}
 
-// --- Scoring ---
-function computeScores() {
-  let blueScore = 0, redScore = 0;
-  const regions = [];
-  const types = ['row', 'col', 'block'];
-  const labels = [];
-  for (let n = 0; n < 9; n++) labels.push('Row ' + (n + 1));
-  for (let n = 0; n < 9; n++) labels.push('Col ' + (n + 1));
-  for (let n = 0; n < 9; n++) labels.push('Block ' + (n + 1));
-
-  let li = 0;
-  for (const type of types) {
-    for (let n = 0; n < 9; n++) {
-      let b = 0, r = 0;
+    function usedInRegion(type, n) {
+      const used = new Set();
       for (const i of regionCells(type, n)) {
-        if (board[i].color === 'blue') b++;
-        else if (board[i].color === 'red') r++;
+        if (board[i].value) used.add(board[i].value);
       }
-      let winner = null;
-      if (b > r) { blueScore++; winner = 'blue'; }
-      else if (r > b) { redScore++; winner = 'red'; }
-      regions.push({ label: labels[li], blue: b, red: r, winner });
-      li++;
+      return used;
     }
-  }
-  return { blueScore, redScore, regions };
-}
 
-// --- Rendering ---
-function renderBoard() {
-  const table = document.getElementById('board');
-  table.innerHTML = '';
-  for (let r = 0; r < 9; r++) {
-    const tr = document.createElement('tr');
-    for (let c = 0; c < 9; c++) {
-      const td = document.createElement('td');
-      const cell = board[idx(r, c)];
-      if (cell.value) {
-        td.textContent = cell.value;
-        td.className = cell.color + ' filled';
+    function legalDigits(cellIdx) {
+      const r = rowOf(cellIdx), c = colOf(cellIdx), b = blockOf(cellIdx);
+      const used = new Set([...usedInRegion('row', r), ...usedInRegion('col', c), ...usedInRegion('block', b)]);
+      const legal = [];
+      for (let d = 1; d <= 9; d++) if (!used.has(d)) legal.push(d);
+      return legal;
+    }
+
+    function anyLegalMoveExists() {
+      for (let i = 0; i < 81; i++) {
+        if (!board[i].value && legalDigits(i).length > 0) return true;
+      }
+      return false;
+    }
+
+    // --- Gold placement ---
+    function placeGoldDigits() {
+      const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      // Shuffle
+      for (let i = digits.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [digits[i], digits[j]] = [digits[j], digits[i]];
+      }
+      for (const d of digits) {
+        const candidates = [];
+        for (let i = 0; i < 81; i++) {
+          if (!board[i].value && legalDigits(i).includes(d)) candidates.push(i);
+        }
+        if (candidates.length === 0) return false; // shouldn't happen but safety
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        board[pick] = { value: d, color: 'gold' };
+      }
+      return true;
+    }
+
+    // --- Scoring ---
+    function computeScores() {
+      let blueScore = 0, redScore = 0;
+      const regions = [];
+      const types = ['row', 'col', 'block'];
+      const labels = [];
+      for (let n = 0; n < 9; n++) labels.push('Row ' + (n + 1));
+      for (let n = 0; n < 9; n++) labels.push('Col ' + (n + 1));
+      for (let n = 0; n < 9; n++) labels.push('Block ' + (n + 1));
+
+      let li = 0;
+      for (const type of types) {
+        for (let n = 0; n < 9; n++) {
+          let b = 0, r = 0;
+          for (const i of regionCells(type, n)) {
+            if (board[i].color === 'blue') b++;
+            else if (board[i].color === 'red') r++;
+          }
+          let winner = null;
+          if (b > r) { blueScore++; winner = 'blue'; }
+          else if (r > b) { redScore++; winner = 'red'; }
+          regions.push({ label: labels[li], blue: b, red: r, winner });
+          li++;
+        }
+      }
+      return { blueScore, redScore, regions };
+    }
+
+    // --- Rendering ---
+    function renderBoard() {
+      const table = document.getElementById('board');
+      table.innerHTML = '';
+      for (let r = 0; r < 9; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < 9; c++) {
+          const td = document.createElement('td');
+          const cell = board[idx(r, c)];
+          if (cell.value) {
+            td.textContent = cell.value;
+            td.className = cell.color + ' filled';
+          } else {
+            td.addEventListener('click', (e) => onCellClick(r, c, e));
+          }
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+    }
+
+    function updateStatus() {
+      const el = document.getElementById('status');
+      if (gameOver) return; // handled in endGame
+      el.innerHTML = `<span class="${currentPlayer}">${capitalize(currentPlayer)}</span>'s turn`;
+    }
+
+    function capitalize(s) { return s[0].toUpperCase() + s.slice(1); }
+
+    // --- Picker ---
+    function onCellClick(r, c, event) {
+      if (gameOver || aiThinking) return;
+      const cellIdx = idx(r, c);
+      if (board[cellIdx].value) return;
+      const digits = legalDigits(cellIdx);
+      if (digits.length === 0) return;
+      showPicker(r, c, digits, event);
+    }
+
+    function showPicker(r, c, digits, event) {
+      const picker = document.getElementById('picker');
+      const overlay = document.getElementById('picker-overlay');
+      picker.innerHTML = '';
+      for (const d of digits) {
+        const btn = document.createElement('button');
+        btn.textContent = d;
+        btn.className = currentPlayer;
+        btn.addEventListener('click', () => {
+          placeDigit(r, c, d);
+          hidePicker();
+        });
+        picker.appendChild(btn);
+      }
+      overlay.style.display = 'block';
+      picker.style.display = 'block';
+
+      // Position near the clicked cell
+      const rect = event.target.getBoundingClientRect();
+      picker.style.left = rect.left + 'px';
+      picker.style.top = (rect.bottom + 4) + 'px';
+
+      overlay.onclick = hidePicker;
+    }
+
+    function hidePicker() {
+      document.getElementById('picker').style.display = 'none';
+      document.getElementById('picker-overlay').style.display = 'none';
+    }
+
+    // --- Game logic ---
+    function placeDigit(r, c, digit) {
+      board[idx(r, c)] = { value: digit, color: currentPlayer };
+      lastPlayer = currentPlayer;
+      currentPlayer = currentPlayer === 'blue' ? 'red' : 'blue';
+      renderBoard();
+
+      // Check game end
+      const emptyCells = board.filter(cell => !cell.value).length;
+      if (emptyCells === 0 || !anyLegalMoveExists()) {
+        endGame();
       } else {
-        td.addEventListener('click', (e) => onCellClick(r, c, e));
+        updateStatus();
+        updateScoreDetail();
+        aiTurn();
       }
-      tr.appendChild(td);
     }
-    table.appendChild(tr);
-  }
-}
 
-function updateStatus() {
-  const el = document.getElementById('status');
-  if (gameOver) return; // handled in endGame
-  el.innerHTML = `<span class="${currentPlayer}">${capitalize(currentPlayer)}</span>'s turn`;
-}
+    function updateScoreDetail() {
+      const { blueScore, redScore, regions } = computeScores();
+      const detailEl = document.getElementById('score-detail');
+      if (!gameOver) {
+        detailEl.innerHTML = `Score: <span class="blue">Blue ${blueScore}</span> — <span class="red">${redScore} Red</span>`;
+        return;
+      }
+      // Show per-region breakdown at game end
+      const lines = regions.map(r => {
+        const w = r.winner ? `<span class="${r.winner}">${capitalize(r.winner)}</span>` : 'Tie';
+        return `${r.label}: B${r.blue} R${r.red} → ${w}`;
+      });
+      detailEl.innerHTML = `<details><summary>Score: <span class="blue">Blue ${blueScore}</span> — <span class="red">${redScore} Red</span> (click for details)</summary><div style="columns:3;margin-top:6px;font-size:0.85em;line-height:1.6">${lines.join('<br>')}</div></details>`;
+    }
 
-function capitalize(s) { return s[0].toUpperCase() + s.slice(1); }
+    function endGame() {
+      gameOver = true;
+      if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+      aiThinking = false;
+      const { blueScore, redScore } = computeScores();
+      const statusEl = document.getElementById('status');
+      let result;
+      if (blueScore > redScore) result = '<span class="blue">Blue wins!</span>';
+      else if (redScore > blueScore) result = '<span class="red">Red wins!</span>';
+      else result = `<span class="${lastPlayer}">Tie — ${capitalize(lastPlayer)} wins</span> (last placement)`;
+      statusEl.innerHTML = `Game Over — ${result}`;
+      updateScoreDetail();
+    }
 
-// --- Picker ---
-function onCellClick(r, c, event) {
-  if (gameOver || aiThinking) return;
-  const cellIdx = idx(r, c);
-  if (board[cellIdx].value) return;
-  const digits = legalDigits(cellIdx);
-  if (digits.length === 0) return;
-  showPicker(r, c, digits, event);
-}
+    // --- AI player (greedy) ---
+    function aiChooseMove() {
+      let bestScore = -Infinity;
+      let bestMoves = [];
+      const aiColor = currentPlayer;
+      const oppColor = aiColor === 'blue' ? 'red' : 'blue';
 
-function showPicker(r, c, digits, event) {
-  const picker = document.getElementById('picker');
-  const overlay = document.getElementById('picker-overlay');
-  picker.innerHTML = '';
-  for (const d of digits) {
-    const btn = document.createElement('button');
-    btn.textContent = d;
-    btn.className = currentPlayer;
-    btn.addEventListener('click', () => {
-      placeDigit(r, c, d);
-      hidePicker();
+      for (let i = 0; i < 81; i++) {
+        if (board[i].value) continue;
+        const digits = legalDigits(i);
+        for (const d of digits) {
+          // Simulate
+          board[i] = { value: d, color: aiColor };
+          const scores = computeScores();
+          const delta = scores[aiColor + 'Score'] - scores[oppColor + 'Score'];
+          // Undo
+          board[i] = { value: null, color: null };
+
+          if (delta > bestScore) {
+            bestScore = delta;
+            bestMoves = [{ cell: i, digit: d }];
+          } else if (delta === bestScore) {
+            bestMoves.push({ cell: i, digit: d });
+          }
+        }
+      }
+      if (bestMoves.length === 0) return null;
+      return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+    }
+
+    function aiTurn() {
+      if (gameOver || !aiEnabled || currentPlayer !== 'red') return;
+      aiThinking = true;
+      aiTimeoutId = setTimeout(() => {
+        aiTimeoutId = null;
+        if (gameOver || !aiEnabled || currentPlayer !== 'red') { aiThinking = false; return; }
+        const move = aiChooseMove();
+        if (move) {
+          placeDigit(rowOf(move.cell), colOf(move.cell), move.digit);
+        } else if (!gameOver) {
+          // No legal moves for AI: end the game
+          endGame();
+        }
+        aiThinking = false;
+      }, 400);
+    }
+
+    // --- Theme ---
+    const themeToggle = document.getElementById('theme-toggle');
+    function setTheme(isDark) {
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('sudoku2-theme', 'dark');
+        themeToggle.textContent = '☀️ Light Mode';
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('sudoku2-theme', 'light');
+        themeToggle.textContent = '🌙 Dark Mode';
+      }
+    }
+    themeToggle.addEventListener('click', () => {
+      setTheme(!document.body.classList.contains('dark-mode'));
     });
-    picker.appendChild(btn);
-  }
-  overlay.style.display = 'block';
-  picker.style.display = 'block';
+    // Initialize theme
+    const savedTheme = localStorage.getItem('sudoku2-theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      setTheme(true);
+    } else {
+      setTheme(false);
+    }
 
-  // Position near the clicked cell
-  const rect = event.target.getBoundingClientRect();
-  picker.style.left = rect.left + 'px';
-  picker.style.top = (rect.bottom + 4) + 'px';
-
-  overlay.onclick = hidePicker;
-}
-
-function hidePicker() {
-  document.getElementById('picker').style.display = 'none';
-  document.getElementById('picker-overlay').style.display = 'none';
-}
-
-// --- Game logic ---
-function placeDigit(r, c, digit) {
-  board[idx(r, c)] = { value: digit, color: currentPlayer };
-  lastPlayer = currentPlayer;
-  currentPlayer = currentPlayer === 'blue' ? 'red' : 'blue';
-  renderBoard();
-
-  // Check game end
-  const emptyCells = board.filter(cell => !cell.value).length;
-  if (emptyCells === 0 || !anyLegalMoveExists()) {
-    endGame();
-  } else {
-    updateStatus();
-    updateScoreDetail();
-    aiTurn();
-  }
-}
-
-function updateScoreDetail() {
-  const { blueScore, redScore, regions } = computeScores();
-  const detailEl = document.getElementById('score-detail');
-  if (!gameOver) {
-    detailEl.innerHTML = `Score: <span class="blue">Blue ${blueScore}</span> — <span class="red">${redScore} Red</span>`;
-    return;
-  }
-  // Show per-region breakdown at game end
-  const lines = regions.map(r => {
-    const w = r.winner ? `<span class="${r.winner}">${capitalize(r.winner)}</span>` : 'Tie';
-    return `${r.label}: B${r.blue} R${r.red} → ${w}`;
-  });
-  detailEl.innerHTML = `<details><summary>Score: <span class="blue">Blue ${blueScore}</span> — <span class="red">${redScore} Red</span> (click for details)</summary><div style="columns:3;margin-top:6px;font-size:0.85em;line-height:1.6">${lines.join('<br>')}</div></details>`;
-}
-
-function endGame() {
-  gameOver = true;
-  if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
-  aiThinking = false;
-  const { blueScore, redScore } = computeScores();
-  const statusEl = document.getElementById('status');
-  let result;
-  if (blueScore > redScore) result = '<span class="blue">Blue wins!</span>';
-  else if (redScore > blueScore) result = '<span class="red">Red wins!</span>';
-  else result = `<span class="${lastPlayer}">Tie — ${capitalize(lastPlayer)} wins</span> (last placement)`;
-  statusEl.innerHTML = `Game Over — ${result}`;
-  updateScoreDetail();
-}
-
-// --- AI player (greedy) ---
-function aiChooseMove() {
-  let bestScore = -Infinity;
-  let bestMoves = [];
-  const aiColor = currentPlayer;
-  const oppColor = aiColor === 'blue' ? 'red' : 'blue';
-
-  for (let i = 0; i < 81; i++) {
-    if (board[i].value) continue;
-    const digits = legalDigits(i);
-    for (const d of digits) {
-      // Simulate
-      board[i] = { value: d, color: aiColor };
-      const scores = computeScores();
-      const delta = scores[aiColor + 'Score'] - scores[oppColor + 'Score'];
-      // Undo
-      board[i] = { value: null, color: null };
-
-      if (delta > bestScore) {
-        bestScore = delta;
-        bestMoves = [{ cell: i, digit: d }];
-      } else if (delta === bestScore) {
-        bestMoves.push({ cell: i, digit: d });
+    // --- Init ---
+    function initGame() {
+      if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+      aiThinking = false;
+      hidePicker();
+      gameOver = false;
+      currentPlayer = 'blue';
+      lastPlayer = null;
+      document.getElementById('score-detail').textContent = '';
+      for (let i = 0; i < 81; i++) board[i] = { value: null, color: null };
+      // Retry gold placement if it somehow fails
+      let ok = false;
+      for (let attempt = 0; attempt < 100 && !ok; attempt++) {
+        for (let i = 0; i < 81; i++) board[i] = { value: null, color: null };
+        ok = placeGoldDigits();
       }
+      renderBoard();
+      updateStatus();
+      updateScoreDetail();
     }
-  }
-  if (bestMoves.length === 0) return null;
-  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
-}
 
-function aiTurn() {
-  if (gameOver || !aiEnabled || currentPlayer !== 'red') return;
-  aiThinking = true;
-  aiTimeoutId = setTimeout(() => {
-    aiTimeoutId = null;
-    if (gameOver || !aiEnabled || currentPlayer !== 'red') { aiThinking = false; return; }
-    const move = aiChooseMove();
-    if (move) {
-      placeDigit(rowOf(move.cell), colOf(move.cell), move.digit);
-    } else if (!gameOver) {
-      // No legal moves for AI: end the game
-      endGame();
-    }
-    aiThinking = false;
-  }, 400);
-}
-
-// --- Init ---
-function initGame() {
-  if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
-  aiThinking = false;
-  hidePicker();
-  gameOver = false;
-  currentPlayer = 'blue';
-  lastPlayer = null;
-  document.getElementById('score-detail').textContent = '';
-  for (let i = 0; i < 81; i++) board[i] = { value: null, color: null };
-  // Retry gold placement if it somehow fails
-  let ok = false;
-  for (let attempt = 0; attempt < 100 && !ok; attempt++) {
-    for (let i = 0; i < 81; i++) board[i] = { value: null, color: null };
-    ok = placeGoldDigits();
-  }
-  renderBoard();
-  updateStatus();
-  updateScoreDetail();
-}
-
-document.getElementById('new-game').addEventListener('click', initGame);
-document.getElementById('opponent').addEventListener('change', function() {
-  aiEnabled = this.value === 'ai';
-  initGame();
-});
-aiEnabled = document.getElementById('opponent').value === 'ai';
-initGame();
-</script>
+    document.getElementById('new-game').addEventListener('click', initGame);
+    document.getElementById('opponent').addEventListener('change', function () {
+      aiEnabled = this.value === 'ai';
+      initGame();
+    });
+    aiEnabled = document.getElementById('opponent').value === 'ai';
+    initGame();
+  </script>
 </body>
+
 </html>
