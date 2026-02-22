@@ -1,0 +1,86 @@
+/* Dark Mode */
+body.dark-mode {
+  background: #121212;
+  color: #f0f0f0;
+}
+
+body.dark-mode #board td {
+  border-color: #555;
+}
+
+body.dark-mode #board td:hover {
+  background: #2a2a2a;
+}
+
+body.dark-mode #board td.filled:hover {
+  background: transparent;
+}
+
+body.dark-mode #board td:nth-child(3n) {
+  border-right-color: #888;
+}
+
+body.dark-mode #board td:nth-child(3n+1) {
+  border-left-color: #888;
+}
+
+body.dark-mode #board tr:nth-child(3n) td {
+  border-bottom-color: #888;
+}
+
+body.dark-mode #board tr:nth-child(3n+1) td {
+  border-top-color: #888;
+}
+
+body.dark-mode #picker {
+  background: #222;
+  border-color: #888;
+}
+
+body.dark-mode #picker button {
+  background: #333;
+  border-color: #555;
+  color: #f0f0f0;
+}
+
+body.dark-mode #picker button:hover {
+  background: #444;
+}
+
+body.dark-mode #new-game,
+body.dark-mode #mode-select select,
+body.dark-mode #theme-toggle {
+  background: #333;
+  color: #f0f0f0;
+  border: 1px solid #666;
+}
+
+body.dark-mode #new-game:hover,
+body.dark-mode #theme-toggle:hover {
+  background: #444;
+}
+
+body.dark-mode #score-detail {
+  color: #bbb;
+}
+
+body.dark-mode #rules {
+  color: #ccc;
+}
+
+body.dark-mode #rules h2,
+body.dark-mode #rules h3 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .gold {
+  color: #e5b320;
+}
+
+body.dark-mode .blue {
+  color: #4da6ff;
+}
+
+body.dark-mode .red {
+  color: #ff6666;
+}
